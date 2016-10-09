@@ -27,13 +27,15 @@ void printdir(char *dir, int depth){
 	 if ((strcmp(".", entry->d_name) == 0) ||
 		 strcmp("..", entry->d_name) == 0) // 문자열이 '.' 또는 '..'이면
 			 continue;// 다음 엔트리 읽어들이기
+	     if(entry->d_name[0]=='.') continue;
 	     // 디렉토리나 파일이면
 	 printf("%*s%s/\n", depth, " ", entry->d_name);// 디렉토리 depth와 디렉토리명을 출력
 	 /*Recurse at a new indent level */
 	 printdir(entry->d_name, depth+4);// 디렉토리명으로 재귀호출
-     } else// 디렉토리가 아니고 파일이면 
-	 printf("%*s%s\n", depth, " ", entry->d_name);// depth와 파일명을 출력
-  }
+     } else{// 디렉토리가 아니고 파일이면 
+	if(entry->d_name[0]=='.') continue;
+	     printf("%*s%s\n", depth, " ", entry->d_name);// depth와 파일명을 출력
+  }}
   chdir(".."); // 이전 디렉토리로 이동
   closedir(dp); // dp에 열려있는 디렉토리 닫기
 }

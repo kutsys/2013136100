@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+extern char **environ; //외부 참조로 변수 선언
 int main()
 {
 	printf( "%s = %s\n", "$HOME", getenv( "HOME"));

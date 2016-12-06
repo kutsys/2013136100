@@ -18,7 +18,7 @@ int main() { // 여기서는 인자를 넣지 않고 직접 파일을 지정하�
 		exit(1);
 	} // 복사할 파일을 열 때 오류가 나면 출력한다.
 
-	if ( (out = fopen("file.out", "w")) == NULL ) { 
+	if ( (out = fopen("high.out", "w")) == NULL ) { 
 		printf("Cannot Open  the  Write file\n");
 		exit(1);
 	} // 복사를 당할  파일을 열 때  오류가 나면 오류를 출력한다.

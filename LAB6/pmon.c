@@ -1,113 +1,125 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <time.h>
-#include <termios.h>
 #include <unistd.h>
- 
-void monitor(int sig);
-int get_pid();
-void print_command();
-void test_start();
-void test_kill();
- 
+#include <signal.h>
+#include <string.h>
+int run;  // ptest가 동작중이면 1, 없으면 0
+char gpid[10]; // ptest의 프로세스 ID
+void start(); // ptest 프로세스 시작 함수
+void restart(); // ptest  프로세스 리스타트 함수
+void pkill(); //ptest 프로세스 죽이는 함수
+void print_command(); // 명령어 안내 출력
+
+// ptest가 동작하는지 안하는지 검사하는 함수이다.
+// 시그널 알람이 뜨면 호출되는 함수이다.
+// 동작하면 ptest 프로세스 ID값을 읽어온다
+void IsExist(int sig){
+
+	if(sig == SIGALRM){
+		FILE *fp = NULL;
+	    	// 프로세스 ID값을 알아온다
+	    	if((fp = popen("pgrep -x ptest","r")) ==NULL)
+			     printf("error\n");
+
+        // 프로스세 ID 값을 얻어온다
+	    	if(fgets(gpid,10,fp) !=NULL){
+			       printf("\n%s ",gpid);
+			       run =1; // ID값이 있다는 것은 동작중이라는 뜻!
+			      printf("running\n");
+		    }
+		      else // ID값이 없다면 동작 하지 않는다는 것
+			printf("not existed\n");
+
+	    pclose(fp);
+	}
+  // 다시 5초마다 알람
+	alarm(5);
+
+}
+
 int main(){
-	char command[2];
-	int  work = 1;
-	signal( SIGALRM, monitor);
-	alarm(4);	
- 
-	while(work){//선택 
-	print_command();
-	scanf("%s", command);
-	switch(command[0]){
-	//testmon 종료
-	case 'q':
-	case 'Q':{ work = 0; break; }
-	//test 죽이기
-	case 'k':
-	case 'K':{
-	if( get_pid() )
-	test_kill();	
-	else 
-	printf("test is not working!\n");
+	run = 0; // 처음 초기값을 0으로 일단 해둔다
+	char input; // 사용자 명령어
+  // 모니터링 을 5초마다 알람해둔다
+        alarm(5);
+	signal(SIGALRM,IsExist);
 	
-	break;
+	print_command();
+	while(1){
+		scanf("%c",&input);
+
+		switch(input){
+			case 'q':
+			case 'Q':
+				pkill();
+				printf("quit ! bye bye!\n\n");
+				return 0;
+			case 'k':
+			case 'K':
+				pkill();
+				print_command();
+				break;
+			case 's':
+			case 'S':
+				start();
+				print_command();
+				break;
+			case 'r':
+			case 'R':
+				restart();
+				print_command();
+				break;
+
+		}
+
 	}
-	//test 시작
-	case 's':
-	case 'S':{
-	if(get_pid())  //이미 시작되었을 경우
-	printf("already executed!\n");
-	else{
-	test_start();
-	printf("test start!\n");
-	}	
-	break;
-	}
-	//test 재시작
-	case 'r':
-	case 'R':{
-	if( get_pid() ){ //test를 죽인 뒤 2초 후 다시 시작
-	test_kill();
-	alarm(2);
-	test_start();
-	printf("test restarted!\n");
+
+}
+
+void print_command(){
+	puts("\n\n-----------------------------");
+	puts("  Q : quit (quit pmon)   ");
+	puts("  K : kill (kill ptest)      ");
+	puts("  S : start (start ptest)    ");
+	puts("  R : restart (restart ptest)");
+	puts("-----------------------------");
+}
+// 프로세스 시작함수
+void start(){
+  // run 값에 따라서 판단...
+  //run이 0이면 동작하지 않으므로 새로 시작...
+  // run이 1이면 이미 동작중인 프로세스가 있음
+	if(run == 0){
+	        system("gnome-terminal --command \"./ptest\"");		
+		run = 1;
 	}
 	else
-	printf("test is not working!\n");
-	break;
+		printf("already running\n\n");
+}
+// run이 0이면 start 함수 호출
+// run이 1이면 동작 중인 프로세스를 pkill함수로 죽임
+// 그리고 start 함수 호출
+void restart(){
+	if(run == 0){
+		printf("newly started\n");
+		start();
 	}
-	}	
-	printf("\n\n");
+	else{
+		pkill();
+		run = 0;
+		printf("restartd!!\n\n");
+		start();
 	}
-	
-	return 0;
 }
- 
-//test 실행여부 확인
-void monitor(int sig){
-	if(!get_pid()){//test가 실행되고 있지 않을 경우
-	printf("test is terminated.\n");
-	//test_start();	
+
+// 동작중이면 pkill 호출. SIGKILL 이용
+
+void pkill(){
+	if(run == 0)
+		printf("not exist ptest \n\n");
+	else{
+    //프로세스 ID값을 정수로 변환
+		kill(atoi(gpid), SIGKILL);
+		run = 0;
+		printf("Success killed ptest!!\n\n");
 	}
-	else{ //test실행 확인, command 입력
-	system("pgrep -x test");
-	puts(">> operator's command: ");
-	}
-	alarm(4);
-}
- 
- //pid얻어오기
-int get_pid(){
-	FILE* read_pid;
-	char context[1024];
-	
-	context[0] = '\0';
-	read_pid = popen("pgrep -x test", "r");
-	fread(context, 1, 1024, read_pid);
-	pclose(read_pid);
- 
-	return atoi(context);	// test not working -> 0
-}
- 
-//coommand 출력
-void print_command(){
-	puts("-----------------------------");
-	puts("  Q : quit (quit testmon)   ");
-	puts("  K : kill (kill test)      ");
-	puts("  S : start (start test)    ");
-	puts("  R : restart (restart test)");
-	puts("-----------------------------");
-}
- 
-//test 시작
-void test_start(){
-	system("./test  >> /dev/pts/25 &");	//test를 실행시킬 터미널창 고정
-}
- 
-//test 종료
-void test_kill(){
-	printf("killed %d\n", get_pid());
-	kill(get_pid(), SIGKILL); //죽이기
 }

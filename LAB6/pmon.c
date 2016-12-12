@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <string.h>
+#include <stdlib.h>
 int run;  // ptest가 동작중이면 1, 없으면 0
 char gpid[10]; // ptest의 프로세스 ID
 void start(); // ptest 프로세스 시작 함수

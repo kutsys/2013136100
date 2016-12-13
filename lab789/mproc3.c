@@ -23,6 +23,8 @@ int main(){
 
 	// Semaphore initialization
 	res = sem_init(&bin_sem, 0, 0);
+	
+	printf("lab9_2013136100_Lee Jinsol\n");
 		
 	//initialize counter value for each thread
 	for(i = 0; i<NUM_THREAD; i++){

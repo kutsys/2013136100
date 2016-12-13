@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
 		close(pipeId);
 
 		//print gathered data
-		printf("Producer PID: %s, Studnet ID: %s\n", producerPid, studentId);
+		printf("Producer PID: %s \nStudnet ID: %s\n", producerPid, studentId);
 
 		//open consumer pipe (Write Only)
 		pipeId = open(CONSUMER_FIFO, O_WRONLY);

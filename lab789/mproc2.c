@@ -37,7 +37,7 @@ int main () {
 	pthread_t threads[TOTAL_THREAD];
 	void *thread_result;
 
-	printf("2009160118 Lee Dong-Seok\n");
+	printf("lab8_2013136100_Lee Jinsol\n");
 
 	for(int i=0; i<TOTAL_THREAD; i++) {
 		printf("Creating Thread.\n");

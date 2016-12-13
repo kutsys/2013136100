@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
 			close(pipeId);
 
 			//print gathered data
-			printf("Producer PID: %s, Consumer PID: %s, Student ID: %s, Student Name: %s\n", myPid, consumerPid, studentId, studentName);
+			printf("Producer PID: %s \nConsumer PID: %s \nStudent ID: %s \nStudent Name: %s\n", myPid, consumerPid, studentId, studentName);
 		}
 	}
 	exit(EXIT_SUCCESS);
